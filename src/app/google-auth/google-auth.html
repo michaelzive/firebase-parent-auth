@@ -1,0 +1,12 @@
+<div class="container">
+  @if (user$ | async; as user) {
+    <div>
+      <p>Welcome, {{ user.displayName }}</p>
+      <button (click)="signOutUser()">Sign Out</button>
+    </div>
+  } @else {
+    <div>
+      <button (click)="signInWithGoogle()">Sign In with Google</button>
+    </div>
+  }
+</div>
