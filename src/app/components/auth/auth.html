@@ -1,0 +1,32 @@
+@if (user$ | async; as user) {
+  <div class="user-card">
+    <h2>Welcome!</h2>
+    <p>
+      You are signed in as {{ user.displayName || user.email }}.
+    </p>
+    <button (click)="signOutUser()">Sign Out</button>
+  </div>
+} @else {
+  <div class="auth-container">
+    <h2>Sign In or Sign Up</h2>
+    <form [formGroup]="authForm" (ngSubmit)="signInWithEmail()" class="auth-form">
+      <input formControlName="email" type="email" placeholder="Email" required />
+      <input formControlName="password" type="password" placeholder="Password" required />
+
+      <div class="button-group">
+        <button type="submit" [disabled]="authForm.invalid">Sign In</button>
+        <button type="button" (click)="signUpWithEmail()" [disabled]="authForm.invalid">Sign Up</button>
+      </div>
+    </form>
+
+    <p>or</p>
+
+    <button class="google-btn" (click)="signInWithGoogle()">
+      Sign In with Google
+    </button>
+
+    @if (authError()) {
+      <p class="error">{{ authError() }}</p>
+    }
+  </div>
+}

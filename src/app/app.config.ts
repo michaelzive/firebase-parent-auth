@@ -1,8 +1,17 @@
-import { ApplicationConfig, inject } from '@angular/core';
+import { ApplicationConfig, InjectionToken, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { FirebaseApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getAuth, provideAuth } from '@angular/fire/auth';
+import { GoogleAuthProvider, getAuth, provideAuth } from '@angular/fire/auth';
 import { routes } from './app.routes';
+
+export const GOOGLE_AUTH_PROVIDER = new InjectionToken<GoogleAuthProvider>('google-auth-provider', {
+  providedIn: 'root',
+  factory: () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+    return provider;
+  },
+});
 
 // Your web app's Firebase configuration
 const firebaseConfig = {

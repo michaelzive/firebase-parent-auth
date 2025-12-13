@@ -1,23 +1,23 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Auth, GoogleAuthProvider, signInWithPopup, signOut, authState, User } from '@angular/fire/auth';
+import { Auth, signInWithPopup, signOut, authState, User, GoogleAuthProvider } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
+import { GOOGLE_AUTH_PROVIDER } from '../../app.config';
 
 @Component({
   selector: 'app-google-auth',
   templateUrl: './google-auth.html',
   styleUrls: ['./google-auth.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
 export class GoogleAuthComponent {
   private auth = inject(Auth);
+  private googleProvider = inject(GOOGLE_AUTH_PROVIDER);
   public user$: Observable<User | null> = authState(this.auth);
 
   signInWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-    signInWithPopup(this.auth, provider)
+    signInWithPopup(this.auth, this.googleProvider)
       .catch((error) => {
         console.error(error);
       });

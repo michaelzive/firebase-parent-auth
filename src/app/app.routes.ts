@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { GoogleAuthComponent } from './google-auth/google-auth';
+import { AuthComponent } from './components/auth/auth';
 
 export const routes: Routes = [
-    { path: '', component: GoogleAuthComponent }
+    { path: '', component: AuthComponent }
 ];
