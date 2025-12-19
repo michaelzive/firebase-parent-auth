@@ -1,0 +1,7 @@
+17:10:15.604 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+17:10:15.735 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9000
+09:33:01.979 [NamespaceSystem-akka.actor.default-dispatcher-10] INFO com.firebase.core.namespace.NamespaceActor - rivoniaprimary-parent-auth-prd successfully activated FBKV (SurveyIdle(0)) wait: 105ms, init: 0ms
+09:34:19.028 [Thread-0] INFO com.firebase.server.forge.App$ - Attempting graceful shutdown.
+09:34:19.032 [NamespaceSystem-akka.actor.default-dispatcher-9] INFO com.firebase.core.namespace.Terminator$Terminator - 1 actors left to terminate: rivoniaprimary-parent-auth-prd
+09:34:19.035 [NamespaceSystem-akka.actor.default-dispatcher-10] INFO com.firebase.core.namespace.NamespaceActor - stopped namespace actor for rivoniaprimary-parent-auth-prd
+09:34:19.037 [Thread-0] INFO com.firebase.server.forge.App$ - Graceful shutdown complete.
