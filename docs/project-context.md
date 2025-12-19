@@ -12,8 +12,11 @@ Build a production-ready authentication and registration gateway for a school Pa
 ## Core Features & Flows
 - Auth: email/password login, remember-me persistence, password reset via email, email verification, generic errors (no user enumeration), App Check enforced.
 - Registration + Approval: create auth user + registrationRequests record; user blocked until approved by staff; approvals/rejections only via Functions; custom claims set on approval.
-- Roles: PARENT, APPROVER, SUPER_ADMIN. Guards are UX-only; enforcement via Functions + Firestore Security Rules with custom claims.
-- Optional: link multiple emails to a parent account (approval/verification required).
+- Roles (custom claims; guards are UX-only, enforcement via Functions + Firestore Security Rules):
+	- Parent: guardian account linked to children; receives child_in_grade_* claims based on enrolled grades.
+	- Teacher: staff member with classroom/grade access.
+	- Approver: can vet/approve registrations and edit parent/child data during approval.
+	- child_in_grade_0 ... child_in_grade_7: applied to parents to indicate they have a child in that grade; used for grade-targeted authorization/notifications.
 - Audit logging: auditEvents collection with REGISTERED, EMAIL_VERIFIED, LOGIN_SUCCESS/FAILED, PASSWORD_RESET_REQUESTED, APPROVAL_APPROVED/REJECTED, EMAIL_LINK_REQUESTED. Exported to BigQuery in 1-minute batches; 60-day raw retention; aggregate views for long-lived summaries.
 - Admin: approvals dashboard, users, audit log viewer with filters/pagination, reports, monitoring of DLQ/alerts.
 
@@ -23,20 +26,20 @@ Build a production-ready authentication and registration gateway for a school Pa
 - Admin: /admin, /admin/approvals, /admin/users, /admin/audit, /admin/reports
 
 ## Data Model (Firestore)
-- users/{uid}: auth-linked profile, role, approved flag, parentId, timestamps
-- registrationRequests/{id}: {email, uid, status PENDING|APPROVED|REJECTED, createdAt, ipHash, userAgentHash, rejectionReason?, approverUid?, decidedAt}
-- parentAccounts/{parentId}: {primaryEmail, linkedEmails[], createdAt}
+- users/{uid}: auth-linked profile, roles, approved flag, parentId, timestamps
+- registrationRequests/{id}: {email, uid, parentId, childSummary[{firstName, grade}], status PENDING|APPROVED|REJECTED, createdAt, ipHash, userAgentHash, rejectionReason?, approverUid?, decidedAt}
+- parentAccounts/{parentId}: source of truth for family; {primaryEmail, linkedEmails[], children[{firstName, surname, grade, saId}], createdAt, updatedAt}. Approver edits overwrite children data here.
 - auditEvents/{eventId}: {type, timestamp, uid?, email?, ipHash, userAgentHash, metadata}
 
 ## Cloud Functions (v2, TS)
 - onAuthUserCreated: seed minimal user + audit.
-- approveRegistration(requestId), rejectRegistration(requestId): set claims, update Firestore, audit.
+- approveRegistration(requestId), rejectRegistration(requestId): set claims (parent + child_in_grade_*), update Firestore (including parentAccounts children when edited by approver), audit.
 - linkEmail(parentId, email): request/approve linking, audit.
 - logAuditEvent(event): reusable logger.
 - Audit export: Firestore trigger → Pub/Sub → scheduled 1-minute batch write to BigQuery (partitioned/clustered, dedupe, retries, DLQ).
 
 ## Security & Compliance
-- App Check enforced (Turnstile) on client; verification in Functions/Rules.
+- App Check enforced (reCAPTCHA) on client; verification in Functions/Rules.
 - Firestore Security Rules to enforce roles/claims and approval state; no sensitive data in localStorage; generic auth errors.
 - Rate limiting on registration/login via Functions; idempotent ops; server timestamps only.
 
