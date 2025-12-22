@@ -47,3 +47,4 @@ Thumbs.db
 
 # Angular environment files
 src/environments/
+*.log

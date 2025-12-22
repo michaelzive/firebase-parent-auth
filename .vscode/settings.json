@@ -1,3 +1,8 @@
 {
-  "IDX.agenticWorkspace": true
+  "IDX.agenticWorkspace": true,
+  "builder.serverUrl": "",
+  "builder.command": "npm start",
+  "builder.runDevServer": true,
+  "builder.autoDetectDevServer": true,
+  "builder.launchType": "browser"
 }

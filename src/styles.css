@@ -1,1 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Register page full-height container - works in both Design and Interact views */
+.register-page-full-height {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fb 0%, #e9ecf1 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

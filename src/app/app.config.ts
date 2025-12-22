@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { FirebaseApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angular/fire/app-check';
 import { GoogleAuthProvider, getAuth, provideAuth } from '@angular/fire/auth';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
@@ -19,16 +20,24 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAppCheck(() => {
-      const app = inject(FirebaseApp);
-      return initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider(environment.recaptchaSiteKey),
-        isTokenAutoRefreshEnabled: true,
-      });
-    }),
+    ...(environment.production
+      ? [
+          provideAppCheck(() => {
+            const app = inject(FirebaseApp);
+            return initializeAppCheck(app, {
+              provider: new ReCaptchaV3Provider(environment.recaptchaSiteKey),
+              isTokenAutoRefreshEnabled: true,
+            });
+          }),
+        ]
+      : []),
     provideAuth(() => {
       const app = inject(FirebaseApp);
       return getAuth(app);
-    })
+    }),
+    provideFirestore(() => {
+      const app = inject(FirebaseApp);
+      return getFirestore(app);
+    }),
   ]
 };

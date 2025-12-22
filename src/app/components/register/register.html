@@ -1,0 +1,141 @@
+<section class="page register-page-full-height">
+  <header class="toggle-card">
+    <p class="eyebrow">I am a</p>
+    <div class="toggle">
+      <button type="button" [class.active]="mode() === 'parent'" (click)="setMode('parent')">Parent</button>
+      <button type="button" [class.active]="mode() === 'teacher'" (click)="setMode('teacher')">Teacher</button>
+    </div>
+  </header>
+
+  <section class="card" *ngIf="mode() === 'teacher'; else parentBlock">
+    <h2>👨‍🏫 Teacher Registration</h2>
+    <form [formGroup]="teacherForm" (ngSubmit)="registerTeacher()" class="form-grid">
+      <label>
+        <span>First Name</span>
+        <input type="text" formControlName="firstName" placeholder="John" />
+        <small *ngIf="teacherForm.get('firstName')?.touched && teacherForm.get('firstName')?.invalid">Required</small>
+      </label>
+
+      <label>
+        <span>Last Name</span>
+        <input type="text" formControlName="lastName" placeholder="Doe" />
+        <small *ngIf="teacherForm.get('lastName')?.touched && teacherForm.get('lastName')?.invalid">Required</small>
+      </label>
+
+      <label class="full-row">
+        <span>📧 Email Address</span>
+        <input type="email" formControlName="email" placeholder="you@example.com" />
+        <small *ngIf="teacherForm.get('email')?.touched && teacherForm.get('email')?.invalid">Enter a valid email</small>
+      </label>
+
+      <label class="full-row">
+        <span>🔐 Password</span>
+        <input type="password" formControlName="password" placeholder="Minimum 8 characters" />
+        <small *ngIf="teacherForm.get('password')?.touched && teacherForm.get('password')?.invalid">Min 8 characters</small>
+      </label>
+
+      <label class="full-row grades-field">
+        <span>Grades You Teach</span>
+        <div class="grade-selector" [formGroup]="teacherForm">
+          <button type="button" *ngFor="let grade of gradeOptions" class="grade-button" [class.active]="isGradeSelected(grade)" (click)="toggleGrade(grade)">
+            Grade {{ grade }}
+          </button>
+        </div>
+        <small *ngIf="teacherForm.get('gradesTaught')?.touched && teacherForm.get('gradesTaught')?.invalid">Select at least one grade</small>
+      </label>
+
+      <div class="full-row actions">
+        <button type="submit" [disabled]="teacherForm.invalid || isSubmitting()">{{ isSubmitting() ? 'Registering…' : 'Register as Teacher' }}</button>
+        <button type="button" class="secondary" (click)="registerWithGoogle()" [disabled]="isSubmitting()">Register with Google</button>
+      </div>
+    </form>
+  </section>
+
+  <ng-template #parentBlock>
+    <section class="card">
+      <h2>👨‍👩‍👧 Parent Registration</h2>
+      <form [formGroup]="parentForm" (ngSubmit)="registerParent()" class="form-grid">
+        <label>
+          <span>First Name</span>
+          <input type="text" formControlName="firstName" placeholder="John" />
+          <small *ngIf="parentForm.get('firstName')?.touched && parentForm.get('firstName')?.invalid">Required</small>
+        </label>
+
+        <label>
+          <span>Last Name</span>
+          <input type="text" formControlName="lastName" placeholder="Doe" />
+          <small *ngIf="parentForm.get('lastName')?.touched && parentForm.get('lastName')?.invalid">Required</small>
+        </label>
+
+        <label class="full-row">
+          <span>ID Number</span>
+          <input type="text" formControlName="idNumber" placeholder="Your national ID" />
+          <small *ngIf="parentForm.get('idNumber')?.touched && parentForm.get('idNumber')?.invalid">Required</small>
+        </label>
+
+        <label class="full-row">
+          <span>📧 Email Address</span>
+          <input type="email" formControlName="email" placeholder="you@example.com" />
+          <small *ngIf="parentForm.get('email')?.touched && parentForm.get('email')?.invalid">Enter a valid email</small>
+        </label>
+
+        <label class="full-row">
+          <span>🔐 Password</span>
+          <input type="password" formControlName="password" placeholder="Minimum 8 characters" />
+          <small *ngIf="parentForm.get('password')?.touched && parentForm.get('password')?.invalid">Min 8 characters</small>
+        </label>
+
+        <div class="full-row form-section">
+          <div class="children-header">
+            <h3>👨‍👩‍👧‍👦 Your Children</h3>
+            <button type="button" class="secondary" (click)="addChild()">+ Add Child</button>
+          </div>
+
+          <div class="children-list" formArrayName="children">
+            <div class="child" *ngFor="let child of childrenArray().controls; let i = index" [formGroupName]="i" [ngClass]="'child-' + ['blue', 'green', 'purple', 'amber', 'pink', 'cyan'][i % 6]">
+              <header>
+                <div class="child-title">
+                  <h4>👶 Child {{ i + 1 }}</h4>
+                  <span class="grade-badge" *ngIf="child.get('grade')?.value !== null && child.get('grade')?.value !== undefined">
+                    Grade {{ child.get('grade')?.value }}
+                  </span>
+                </div>
+                <button type="button" class="ghost" (click)="removeChild(i)" [disabled]="childrenArray().length === 1">Remove</button>
+              </header>
+              <div class="child-grid">
+                <label>
+                  <span>First Name</span>
+                  <input type="text" formControlName="firstName" placeholder="Child's name" />
+                  <small *ngIf="child.get('firstName')?.touched && child.get('firstName')?.invalid">Required</small>
+                </label>
+                <label>
+                  <span>Last Name</span>
+                  <input type="text" formControlName="lastName" placeholder="Child's surname" />
+                  <small *ngIf="child.get('lastName')?.touched && child.get('lastName')?.invalid">Required</small>
+                </label>
+                <label>
+                  <span>Grade</span>
+                  <select formControlName="grade">
+                    <option [ngValue]="null">Select a grade</option>
+                    <option *ngFor="let grade of gradeOptions" [ngValue]="grade">Grade {{ grade }}</option>
+                  </select>
+                  <small *ngIf="child.get('grade')?.touched && child.get('grade')?.invalid">Required</small>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="full-row actions">
+          <button type="submit" [disabled]="parentForm.invalid || isSubmitting()">{{ isSubmitting() ? 'Registering…' : 'Register as Parent' }}</button>
+          <button type="button" class="secondary" (click)="registerWithGoogle()" [disabled]="isSubmitting()">Register with Google</button>
+        </div>
+      </form>
+    </section>
+  </ng-template>
+
+  <p class="error" *ngIf="authError()">{{ authError() }}</p>
+  <div class="success" *ngIf="submittedUser() as user">
+    Registered {{ mode() }}: {{ user.email }}. Please verify your email and await approval.
+  </div>
+</section>
