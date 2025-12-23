@@ -1,0 +1,28 @@
+<section class="approvals">
+  <h1>Pending Registrations</h1>
+
+  <p *ngIf="error()" class="error">{{ error() }}</p>
+  <p *ngIf="success()" class="success">{{ success() }}</p>
+
+  <ng-container *ngIf="(pending$ | async) as pending; else loading">
+    <p *ngIf="pending.length === 0">No pending registrations.</p>
+
+    <div *ngFor="let item of pending" class="card">
+      <div class="header">
+        <div>
+          <div class="email">{{ item.email }}</div>
+          <div class="meta">UID: {{ item.uid }} • Role: {{ item.role }} • Provider: {{ item.provider || 'password' }}</div>
+        </div>
+        <div class="actions">
+          <button type="button" (click)="approve(item.uid)" [disabled]="busyFor() === item.uid">Approve</button>
+          <button type="button" class="secondary" (click)="reject(item.uid)" [disabled]="busyFor() === item.uid">Reject</button>
+        </div>
+      </div>
+      <pre>{{ item.payload | json }}</pre>
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <p>Loading pending registrations...</p>
+  </ng-template>
+</section>

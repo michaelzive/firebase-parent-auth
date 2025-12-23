@@ -1,0 +1,68 @@
+.approvals {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.card {
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fdfefe;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.email {
+  font-weight: 600;
+}
+
+.meta {
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #16314d;
+  background: #1f4b75;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #fff;
+  color: #1f4b75;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+pre {
+  background: #f5f7fa;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow: auto;
+}
+
+.error {
+  color: #b00020;
+}
+
+.success {
+  color: #0b6a0b;
+}

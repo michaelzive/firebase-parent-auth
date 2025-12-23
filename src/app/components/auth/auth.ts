@@ -41,14 +41,22 @@ export class AuthComponent {
         takeUntilDestroyed(this.destroyRef),
         switchMap((user) => {
           if (!user) return of(null);
-          return from(this.profileService.needsRegistration(user)).pipe(
-            map((needsRegistration) => ({ user, needsRegistration }))
+          return from(this.profileService.getApprovalStatus(user)).pipe(
+            map((approvalStatus) => ({ user, approvalStatus }))
           );
         })
       )
       .subscribe((result) => {
         if (!result) return;
-        if (result.needsRegistration && this.router.url !== '/register') {
+        const { approvalStatus } = result;
+        if (approvalStatus.status === 'approved') return;
+        if (approvalStatus.status === 'pending' || approvalStatus.status === 'rejected') {
+          if (this.router.url !== '/pending-approval') {
+            this.router.navigateByUrl('/pending-approval');
+          }
+          return;
+        }
+        if (this.router.url !== '/register') {
           this.router.navigateByUrl('/register');
         }
       });
@@ -59,9 +67,14 @@ export class AuthComponent {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  signInWithGoogle() {
+  async signInWithGoogle() {
     this.authError.set(null);
-    signInWithPopup(this.auth, this.googleProvider).catch((error) => this.handleError(error));
+    try {
+      const cred = await signInWithPopup(this.auth, this.googleProvider);
+      await this.handlePostLoginApproval(cred.user);
+    } catch (error) {
+      this.handleError(error as FirebaseError);
+    }
   }
 
   registerNewUser() {
@@ -69,13 +82,16 @@ export class AuthComponent {
     this.router.navigateByUrl('/register');
   }
 
-  signInWithEmail() {
+  async signInWithEmail() {
     this.authError.set(null);
     const { email, password } = this.authForm.getRawValue();
     if (!email || !password) return;
-    signInWithEmailAndPassword(this.auth, email, password).catch((error) =>
-      this.handleError(error)
-    );
+    try {
+      const cred = await signInWithEmailAndPassword(this.auth, email, password);
+      await this.handlePostLoginApproval(cred.user);
+    } catch (error) {
+      this.handleError(error as FirebaseError);
+    }
   }
 
   signOutUser() {
@@ -85,5 +101,24 @@ export class AuthComponent {
   private handleError(error: FirebaseError) {
     this.authError.set(error.message);
     console.error(error);
+  }
+
+  private async handlePostLoginApproval(user: User) {
+    const status = await this.profileService.getApprovalStatus(user);
+    if (status.approved) return;
+
+    if (status.status === 'pending') {
+      this.authError.set('Your account is awaiting approval.');
+      this.router.navigateByUrl('/pending-approval');
+      return;
+    }
+
+    if (status.status === 'rejected') {
+      this.authError.set('Your account was rejected. Please contact support.');
+      this.router.navigateByUrl('/pending-approval');
+      return;
+    }
+
+    this.router.navigateByUrl('/register');
   }
 }

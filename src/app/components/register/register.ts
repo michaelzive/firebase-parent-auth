@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import {
   Auth,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signInWithPopup,
   User,
 } from '@angular/fire/auth';
@@ -17,6 +18,7 @@ import {
 import { FirebaseError } from 'firebase/app';
 import { GOOGLE_AUTH_PROVIDER } from '../../app.config';
 import { ProfileService } from '../../services/profile.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -31,6 +33,7 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
   private googleProvider = inject(GOOGLE_AUTH_PROVIDER);
   private profileService = inject(ProfileService);
+  private router = inject(Router);
 
   mode = signal<'parent' | 'teacher'>('parent');
   authError = signal<string | null>(null);
@@ -116,7 +119,9 @@ export class RegisterComponent {
     try {
       const cred = await createUserWithEmailAndPassword(this.auth, email, password);
       this.submittedUser.set(cred.user);
-      await this.persistRegistration(cred.user, 'parent', this.buildParentPayload());
+      await this.sendVerificationEmail(cred.user);
+      await this.persistRegistration(cred.user, 'parent', this.buildParentPayload(), 'password');
+      await this.router.navigateByUrl('/pending-approval');
     } catch (error) {
       this.handleError(error as FirebaseError);
     } finally {
@@ -137,7 +142,9 @@ export class RegisterComponent {
     try {
       const cred = await createUserWithEmailAndPassword(this.auth, email, password);
       this.submittedUser.set(cred.user);
-      await this.persistRegistration(cred.user, 'teacher', this.buildTeacherPayload());
+      await this.sendVerificationEmail(cred.user);
+      await this.persistRegistration(cred.user, 'teacher', this.buildTeacherPayload(), 'password');
+      await this.router.navigateByUrl('/pending-approval');
     } catch (error) {
       this.handleError(error as FirebaseError);
     } finally {
@@ -152,7 +159,8 @@ export class RegisterComponent {
     try {
       const cred = await signInWithPopup(this.auth, this.googleProvider);
       this.submittedUser.set(cred.user);
-      await this.persistRegistration(cred.user, this.mode(), { mode: this.mode(), provider: 'google' });
+      await this.persistRegistration(cred.user, this.mode(), { mode: this.mode(), provider: 'google' }, 'google');
+      await this.router.navigateByUrl('/pending-approval');
     } catch (error) {
       this.handleError(error as FirebaseError);
     } finally {
@@ -173,11 +181,17 @@ export class RegisterComponent {
     console.error(error);
   }
 
-  private async persistRegistration(user: User, role: 'parent' | 'teacher', payload: Record<string, unknown>) {
-    await this.profileService.markRegistrationComplete(user, {
-      role,
-      payload,
-    });
+  private async sendVerificationEmail(user: User) {
+    await sendEmailVerification(user);
+  }
+
+  private async persistRegistration(
+    user: User,
+    role: 'parent' | 'teacher',
+    payload: Record<string, unknown>,
+    provider: string
+  ) {
+    await this.profileService.submitPendingRegistration(user, role, payload, provider);
   }
 
   private buildParentPayload() {

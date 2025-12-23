@@ -1,0 +1,444 @@
+:host {
+  display: block;
+}
+
+.pending-approval-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 16px 48px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 10px 20px rgba(0, 0, 0, 0.04);
+  display: grid;
+  gap: 16px;
+}
+
+.card.error-card {
+  border-left: 4px solid #dc2626;
+}
+
+.status-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.status-icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.status-header h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge.pending-badge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.rejected-badge {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.unknown-badge {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.message-section {
+  display: grid;
+  gap: 12px;
+}
+
+.message-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.message-text {
+  margin: 0;
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.message-text.error-text {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.rejection-reason {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #991b1b;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.timeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 20px 0;
+  justify-content: space-between;
+}
+
+.timeline-step {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeline-step:first-child {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.timeline-step:last-child {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.step-indicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e5e7eb;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.step-indicator.completed {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.step-indicator.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.timeline-connector {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  align-self: center;
+  margin: 0 -4px;
+}
+
+.timeline-step:last-child ~ .timeline-connector {
+  display: none;
+}
+
+.step-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  max-width: 70px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-button {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.primary-button:hover:not([disabled]) {
+  background: #1d4ed8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transform: translateY(-2px);
+}
+
+.primary-button:active:not([disabled]) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.primary-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.secondary-button {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+.secondary-button:hover:not([disabled]) {
+  background: #4b5563;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  transform: translateY(-2px);
+}
+
+.secondary-button:active:not([disabled]) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.secondary-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+}
+
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.success-feedback {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px;
+  gap: 12px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .pending-approval-container {
+    margin: 20px auto;
+    padding: 0 12px 32px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .status-header {
+    gap: 12px;
+    padding-bottom: 12px;
+  }
+
+  .status-icon {
+    font-size: 24px;
+  }
+
+  .status-header h1 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .message-title {
+    font-size: 16px;
+  }
+
+  .message-text {
+    font-size: 14px;
+  }
+
+  .timeline {
+    margin: 16px 0;
+    gap: 2px;
+  }
+
+  .step-indicator {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .step-label {
+    font-size: 11px;
+    max-width: 60px;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  :host {
+    padding: 8px;
+  }
+
+  .pending-approval-container {
+    margin: 12px auto;
+    padding: 0 8px 24px;
+  }
+
+  .card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .status-header {
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+
+  .status-icon {
+    font-size: 20px;
+  }
+
+  .status-header h1 {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .message-section {
+    gap: 10px;
+  }
+
+  .message-title {
+    font-size: 15px;
+  }
+
+  .message-text {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .rejection-reason {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .timeline {
+    margin: 12px 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .timeline-step {
+    text-align: left !important;
+    align-items: flex-start !important;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .step-indicator {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .timeline-connector {
+    display: none;
+  }
+
+  .step-label {
+    font-size: 12px;
+    max-width: none;
+    margin: 0;
+  }
+
+  .actions {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  button {
+    padding: 11px 14px;
+    font-size: 13px;
+  }
+
+  .success-feedback {
+    padding: 12px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .loading-state {
+    padding: 32px 16px;
+  }
+}

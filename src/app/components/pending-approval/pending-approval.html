@@ -1,0 +1,129 @@
+<section class="pending-approval-container">
+  <div *ngIf="isLoading()" class="card loading-state">
+    <div class="spinner"></div>
+    <span>Checking your approval status...</span>
+  </div>
+
+  <div *ngIf="!isLoading() && status() === 'pending'" class="card">
+    <header class="status-header">
+      <div class="status-icon">⏳</div>
+      <div>
+        <h1>Registration Status</h1>
+        <span class="status-badge pending-badge">Pending Review</span>
+      </div>
+    </header>
+
+    <div class="message-section">
+      <h2 class="message-title">Your registration is under review</h2>
+      <p class="message-text">
+        Thank you for submitting your registration. Your application is currently being reviewed by the Rivonia admin team.
+        We typically process registrations within 2-3 business days.
+      </p>
+      <p class="message-text">
+        You will receive an email notification once your registration has been approved or if we need additional information.
+      </p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-step">
+        <div class="step-indicator completed">✓</div>
+        <p class="step-label">Submitted</p>
+      </div>
+      <div class="timeline-connector"></div>
+      <div class="timeline-step">
+        <div class="step-indicator active">↳</div>
+        <p class="step-label">Review in progress</p>
+      </div>
+      <div class="timeline-connector"></div>
+      <div class="timeline-step">
+        <div class="step-indicator">⋯</div>
+        <p class="step-label">Approval</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="primary-button" (click)="requestEscalation()" [disabled]="escalationRequested()">
+        {{ escalationRequested() ? '✓ Escalation requested' : 'Request escalation' }}
+      </button>
+      <button type="button" class="secondary-button" (click)="goToSignIn()">
+        Back to sign in
+      </button>
+    </div>
+
+    <div *ngIf="escalationRequested() && escalationRequestedAt()" class="success-feedback">
+      <span>✓</span>
+      <span>Your escalation request has been submitted. We'll review your case with priority.</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading() && status() === 'rejected'" class="card error-card">
+    <header class="status-header">
+      <div class="status-icon">❌</div>
+      <div>
+        <h1>Registration Rejected</h1>
+        <span class="status-badge rejected-badge">Not Approved</span>
+      </div>
+    </header>
+
+    <div class="message-section">
+      <h2 class="message-title">We were unable to approve your registration</h2>
+      <p class="message-text">
+        Unfortunately, your registration application was not approved. Below is the reason provided:
+      </p>
+      <div class="rejection-reason">
+        {{ rejectionReason() }}
+      </div>
+    </div>
+
+    <div class="message-section">
+      <p class="message-text">
+        If you believe this decision was made in error, you can request an escalation for further review by our admin team.
+      </p>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="primary-button" (click)="requestEscalation()" [disabled]="escalationRequested()">
+        {{ escalationRequested() ? '✓ Escalation requested' : 'Request escalation' }}
+      </button>
+      <button type="button" class="secondary-button" (click)="goToSignIn()">
+        Back to sign in
+      </button>
+    </div>
+
+    <div *ngIf="escalationRequested() && escalationRequestedAt()" class="success-feedback">
+      <span>✓</span>
+      <span>Your escalation request has been submitted. We'll review your case with priority.</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading() && status() === 'unknown'" class="card error-card">
+    <header class="status-header">
+      <div class="status-icon">⚠️</div>
+      <div>
+        <h1>Unable to Load Status</h1>
+        <span class="status-badge unknown-badge">Unknown</span>
+      </div>
+    </header>
+
+    <div class="message-section">
+      <p class="message-text error-text">
+        {{ error() }}
+      </p>
+      <p class="message-text">
+        Please try refreshing the page, or contact support if the problem persists.
+      </p>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="secondary-button" (click)="goToSignIn()">
+        Back to sign in
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error() && !isLoading() && status() === 'pending'" class="card error-card">
+    <p class="message-text error-text">
+      {{ error() }}
+    </p>
+  </div>
+</section>

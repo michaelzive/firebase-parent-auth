@@ -1,32 +1,116 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
+/* eslint-disable max-len */
 import {setGlobalOptions} from "firebase-functions";
-import {onRequest} from "firebase-functions/https";
-import * as logger from "firebase-functions/logger";
+import {onCall, HttpsError} from "firebase-functions/v2/https";
+import * as admin from "firebase-admin";
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+setGlobalOptions({maxInstances: 10});
+admin.initializeApp();
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+const APPROVAL_ADMIN_ALLOWLIST = ["admin@example.com"]; // TODO: replace with real admin emails.
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const assertApprovalAdmin = (auth: any) => {
+  if (!auth) {
+    throw new HttpsError("unauthenticated", "Authentication required.");
+  }
+
+  const claims = auth.token || {};
+  const requesterEmail = (auth.token.email as string) || "";
+  const isAllowlisted = APPROVAL_ADMIN_ALLOWLIST.includes(requesterEmail.toLowerCase());
+  if (claims["approval_admin"] === true || isAllowlisted) return;
+
+  throw new HttpsError("permission-denied", "You are not authorized to approve registrations.");
+};
+
+export const setApprovalAdmin = onCall(async (request) => {
+  assertApprovalAdmin(request.auth);
+  const uid = request.data.uid as string;
+  if (!uid) {
+    throw new HttpsError("invalid-argument", "Missing uid.");
+  }
+
+  const user = await admin.auth().getUser(uid);
+  const existingClaims = user.customClaims ?? {};
+  await admin.auth().setCustomUserClaims(uid, {
+    ...existingClaims,
+    approval_admin: true,
+  });
+
+  return {success: true};
+});
+
+export const approveRegistration = onCall(async (request) => {
+  assertApprovalAdmin(request.auth);
+
+  const uid = request.data.uid as string;
+  if (!uid) throw new HttpsError("invalid-argument", "Missing uid.");
+
+  const pendingRef = admin.firestore().doc(`pendingRegistrations/${uid}`);
+  const pendingSnap = await pendingRef.get();
+  if (!pendingSnap.exists) {
+    throw new HttpsError("not-found", "Pending registration not found.");
+  }
+
+  const pending = pendingSnap.data() as any;
+  const role = pending.role || "parent";
+  const payload = pending.payload || {};
+
+  const userRecord = await admin.auth().getUser(uid);
+  const existingClaims = userRecord.customClaims ?? {};
+
+  await admin.auth().setCustomUserClaims(uid, {
+    ...existingClaims,
+    approved: true,
+    role,
+  });
+
+  const usersRef = admin.firestore().doc(`users/${uid}`);
+  await usersRef.set(
+    {
+      uid,
+      email: pending.email ?? null,
+      registrationPayload: payload,
+      role,
+      registrationCompleted: true,
+      registrationCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
+      approved: true,
+      approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true}
+  );
+
+  await pendingRef.set(
+    {
+      status: "approved",
+      approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true}
+  );
+
+  return {success: true};
+});
+
+export const rejectRegistration = onCall(async (request) => {
+  assertApprovalAdmin(request.auth);
+
+  const uid = request.data.uid as string;
+  const reason = (request.data.reason as string) || "";
+  if (!uid) throw new HttpsError("invalid-argument", "Missing uid.");
+  if (!reason) throw new HttpsError("invalid-argument", "Rejection reason is required.");
+
+  const pendingRef = admin.firestore().doc(`pendingRegistrations/${uid}`);
+  const pendingSnap = await pendingRef.get();
+  if (!pendingSnap.exists) {
+    throw new HttpsError("not-found", "Pending registration not found.");
+  }
+
+  await pendingRef.set(
+    {
+      status: "rejected",
+      rejectionReason: reason,
+      reviewedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true}
+  );
+
+  return {success: true};
+});

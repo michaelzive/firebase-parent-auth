@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "functions/**/*.ts",
+    "*.config.{js,cjs,mjs,ts}"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}
